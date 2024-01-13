@@ -3,7 +3,7 @@ import random
 
 pygame.init()
 
-width, height = 800, 600
+width, height = 750, 600
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Tetris")
 
@@ -29,6 +29,8 @@ tetrominos = [
 current_tetromino = random.choice(tetrominos)
 current_x = grid_width // 2 - len(current_tetromino[0]) // 2
 current_y = 0
+fall_timer = 0
+fall_speed = 10
 
 
 def is_valid_move(move_x, move_y):
@@ -57,10 +59,17 @@ def rotate_tetromino():
     return new_tetromino
 
 
+def clear_full_rows():
+    full_rows = [i for i, row in enumerate(grid) if all(row)]
+    for row in full_rows:
+        del grid[row]
+        grid.insert(0, [0] * grid_width)
+
+
 running = True
 clock = pygame.time.Clock()
 while running:
-    clock.tick(5)
+    clock.tick(30)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -77,16 +86,27 @@ while running:
                 if is_valid_move(0, 0):
                     current_tetromino = rotated_tetromino
 
-    if not is_valid_move(0, 1):
-        for y in range(len(current_tetromino)):
-            for x in range(len(current_tetromino[y])):
-                if current_tetromino[y][x]:
-                    grid[current_y + y][current_x + x] = 1
-        current_tetromino = random.choice(tetrominos)
-        current_x = grid_width // 2 - len(current_tetromino[0]) // 2
-        current_y = 0
+    fall_timer += 1
+    if fall_timer >= fall_speed:
+        if is_valid_move(0, 1):
+            current_y += 1
+        else:
+            for y in range(len(current_tetromino)):
+                for x in range(len(current_tetromino[y])):
+                    if current_tetromino[y][x]:
+                        grid[current_y + y][current_x + x] = 1
+            clear_full_rows()
+            current_tetromino = random.choice(tetrominos)
+            current_x = grid_width // 2 - len(current_tetromino[0]) // 2
+            current_y = 0
+        fall_timer = 0
 
     screen.fill(BLACK)
+
+    for x in range(grid_width):
+        pygame.draw.line(screen, WHITE, (x * block_size, 0), (x * block_size, height))
+    for y in range(grid_height):
+        pygame.draw.line(screen, WHITE, (0, y * block_size), (width, y * block_size))
 
     for y in range(grid_height):
         for x in range(grid_width):
