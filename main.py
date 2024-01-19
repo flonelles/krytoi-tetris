@@ -17,6 +17,7 @@ class TetrisGame:
 
         self.BLACK = pygame.Color('black')
         self.WHITE = pygame.Color('white')
+        self.colors = [pygame.Color('red'), pygame.Color('blue'), pygame.Color('yellow'), pygame.Color('green')]
 
         self.block_size = 30
         self.grid_width = self.width // self.block_size
@@ -42,6 +43,12 @@ class TetrisGame:
         self.final_score = 0
         self.running = True
         self.clock = pygame.time.Clock()
+
+    def set_fallen_color(self):
+        for y in range(len(self.current_tetromino)):
+            for x in range(len(self.current_tetromino[y])):
+                if self.current_tetromino[y][x]:
+                    self.grid[self.current_y + y][self.current_x + x] = self.color_tetromino
 
     def update_grid_size(self):
         self.grid_width = self.width // self.block_size
@@ -124,6 +131,8 @@ class TetrisGame:
                         self.current_tetromino = rotated_tetromino
 
     def update(self):
+        if self.current_y == 0 and self.fall_timer == 0:
+            self.set_color()
         self.fall_timer += 1
         if self.fall_timer >= self.fall_speed:
             if self.is_valid_move(0, 1):
@@ -132,13 +141,15 @@ class TetrisGame:
                 for y in range(len(self.current_tetromino)):
                     for x in range(len(self.current_tetromino[y])):
                         if self.current_tetromino[y][x]:
-                            self.grid[self.current_y + y][self.current_x + x] = 1
+                            self.grid[self.current_y + y][
+                                self.current_x + x] = self.color_tetromino
                 self.clear_full_rows()
                 if self.current_y <= 0:
                     self.game_over()
                 self.current_tetromino = random.choice(self.tetrominos)
                 self.current_x = self.grid_width // 2 - len(self.current_tetromino[0]) // 2
                 self.current_y = 0
+                self.set_color()
 
             self.fall_timer = 0
 
@@ -186,13 +197,129 @@ class TetrisGame:
 
         pygame.display.flip()
 
-    def run(self):
+    def color_draw(self):
+        self.screen.fill(self.BLACK)
+        font = pygame.font.Font(None, 36)
+        score_text = font.render(f"Счёт: {self.score}", True, self.WHITE)
+        score_rect = score_text.get_rect(topleft=(10, 10))
+        self.screen.blit(score_text, score_rect)
+
+        for x in range(self.grid_width):
+            pygame.draw.line(self.screen, self.WHITE, (x * self.block_size, 0), (x * self.block_size, self.height))
+        for y in range(self.grid_height):
+            pygame.draw.line(self.screen, self.WHITE, (0, y * self.block_size), (self.width, y * self.block_size))
+
+        for y in range(self.grid_height):
+            for x in range(self.grid_width):
+                if self.grid[y][x]:
+                    pygame.draw.rect(
+                        self.screen,
+                        self.grid[y][x],
+                        (x * self.block_size, y * self.block_size, self.block_size, self.block_size)
+                    )
+
+        for y in range(len(self.current_tetromino)):
+            for x in range(len(self.current_tetromino[y])):
+                if self.current_tetromino[y][x]:
+                    pygame.draw.rect(
+                        self.screen,
+                        self.color_tetromino,
+                        (
+                            (self.current_x + x) * self.block_size,
+                            (self.current_y + y) * self.block_size,
+                            self.block_size,
+                            self.block_size
+                        )
+                    )
+
+        pygame.display.flip()
+
+    def run(self, mode):
         while self.running:
             self.clock.tick(30)
             self.handle_events()
             self.update()
-            self.draw()
+            if mode == 0:
+                self.draw()
+            if mode == 1:
+                self.color_draw()
         pygame.quit()
+
+    def set_color(self):
+        self.color_tetromino = random.choice(self.colors)
+        print(self.color_tetromino)
+
+
+class Theme:
+    def __init__(self):
+        pygame.init()
+        self.width, self.height = 330, 600
+        self.screen = pygame.display.set_mode((self.width, self.height))
+        pygame.display.set_caption("Menu")
+
+        self.BLACK = (0, 0, 0)
+        self.WHITE = (255, 255, 255)
+
+        self.title_font = pygame.font.Font(None, 36)
+        self.button_font = pygame.font.Font(None, 28)
+
+        self.title_text = self.title_font.render("Выбор темы", True, self.WHITE)
+        self.title_rect = self.title_text.get_rect(center=(self.width // 2, 100))
+
+        self.play_button_text = self.button_font.render("Классика", True, self.WHITE)
+        self.play_button_rect = self.play_button_text.get_rect(center=(self.width // 2, 300))
+
+        self.quit_button_text = self.button_font.render("Цветной", True, self.WHITE)
+        self.quit_button_rect = self.quit_button_text.get_rect(center=(self.width // 2, 400))
+
+        self.records_button_text = self.button_font.render("Хз", True, self.WHITE)
+        self.records_button_rect = self.records_button_text.get_rect(center=(self.width // 2, 350))
+
+        self.clock = pygame.time.Clock()
+        self.running = True
+
+    def handle_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if self.play_button_rect.collidepoint(event.pos):
+                    pygame.quit()
+                    tetris = TetrisGame()
+                    tetris.run(0)
+                    self.running = False
+                    sys.exit()
+                elif self.quit_button_rect.collidepoint(event.pos):
+                    pygame.quit()
+                    tetris = TetrisGame()
+                    tetris.run(1)
+                    self.running = False
+                    sys.exit()
+                elif self.records_button_rect.collidepoint(event.pos):
+                    pygame.quit()
+                    tetris = TetrisGame()
+                    tetris.run(0)
+                    self.running = False
+                    sys.exit()
+
+    def draw(self):
+        self.screen.fill(self.BLACK)
+        self.screen.blit(self.title_text, self.title_rect)
+        pygame.draw.rect(self.screen, self.WHITE, self.play_button_rect, 2)
+        self.screen.blit(self.play_button_text, self.play_button_rect)
+        pygame.draw.rect(self.screen, self.WHITE, self.quit_button_rect, 2)
+        self.screen.blit(self.quit_button_text, self.quit_button_rect)
+
+        pygame.draw.rect(self.screen, self.WHITE, self.records_button_rect, 2)
+        self.screen.blit(self.records_button_text, self.records_button_rect)
+
+        pygame.display.flip()
+
+    def run(self):
+        while self.running:
+            self.clock.tick(30)
+            self.handle_events()
+            self.draw()
 
 
 class Menu:
@@ -230,8 +357,8 @@ class Menu:
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if self.play_button_rect.collidepoint(event.pos):
                     pygame.quit()
-                    tetris_game = TetrisGame()
-                    tetris_game.run()
+                    theme_menu = Theme()
+                    theme_menu.run()
                     self.running = False
                     sys.exit()
                 elif self.quit_button_rect.collidepoint(event.pos):
