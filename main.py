@@ -17,7 +17,8 @@ class TetrisGame:
 
         self.BLACK = pygame.Color('black')
         self.WHITE = pygame.Color('white')
-        self.colors = [pygame.Color('red'), pygame.Color('blue'), pygame.Color('yellow'), pygame.Color('green')]
+        self.BLUE = pygame.Color('blue')
+        self.colors = [pygame.Color('red'), pygame.Color('blue'), pygame.Color('yellow'), pygame.Color('green'), pygame.Color('pink'), pygame.Color('orange'), pygame.Color('grey')]
 
         self.block_size = 30
         self.grid_width = self.width // self.block_size
@@ -198,7 +199,44 @@ class TetrisGame:
         pygame.display.flip()
 
     def color_draw(self):
-        self.screen.fill(self.BLACK)
+        self.screen.blit(pygame.image.load('image/photo_2024-01-19_20-12-18.jpg'), (0,0))
+        font = pygame.font.Font(None, 36)
+        score_text = font.render(f"Счёт: {self.score}", True, self.WHITE)
+        score_rect = score_text.get_rect(topleft=(10, 10))
+        self.screen.blit(score_text, score_rect)
+
+        for x in range(self.grid_width):
+            pygame.draw.line(self.screen, self.BLACK, (x * self.block_size, 0), (x * self.block_size, self.height))
+        for y in range(self.grid_height):
+            pygame.draw.line(self.screen, self.BLACK, (0, y * self.block_size), (self.width, y * self.block_size))
+
+        for y in range(self.grid_height):
+            for x in range(self.grid_width):
+                if self.grid[y][x]:
+                    pygame.draw.rect(
+                        self.screen,
+                        self.grid[y][x],
+                        (x * self.block_size, y * self.block_size, self.block_size, self.block_size)
+                    )
+
+        for y in range(len(self.current_tetromino)):
+            for x in range(len(self.current_tetromino[y])):
+                if self.current_tetromino[y][x]:
+                    pygame.draw.rect(
+                        self.screen,
+                        self.color_tetromino,
+                        (
+                            (self.current_x + x) * self.block_size,
+                            (self.current_y + y) * self.block_size,
+                            self.block_size,
+                            self.block_size
+                        )
+                    )
+
+        pygame.display.flip()
+
+    def alt_color_draw(self):
+        self.screen.blit(pygame.image.load('image/6068467286.jpg'), (0,0))
         font = pygame.font.Font(None, 36)
         score_text = font.render(f"Счёт: {self.score}", True, self.WHITE)
         score_rect = score_text.get_rect(topleft=(10, 10))
@@ -214,7 +252,7 @@ class TetrisGame:
                 if self.grid[y][x]:
                     pygame.draw.rect(
                         self.screen,
-                        self.grid[y][x],
+                        self.color_tetromino,
                         (x * self.block_size, y * self.block_size, self.block_size, self.block_size)
                     )
 
@@ -243,11 +281,12 @@ class TetrisGame:
                 self.draw()
             if mode == 1:
                 self.color_draw()
+            if mode == 2:
+                self.alt_color_draw()
         pygame.quit()
 
     def set_color(self):
         self.color_tetromino = random.choice(self.colors)
-        print(self.color_tetromino)
 
 
 class Theme:
@@ -272,7 +311,7 @@ class Theme:
         self.quit_button_text = self.button_font.render("Цветной", True, self.WHITE)
         self.quit_button_rect = self.quit_button_text.get_rect(center=(self.width // 2, 400))
 
-        self.records_button_text = self.button_font.render("Хз", True, self.WHITE)
+        self.records_button_text = self.button_font.render("секретный?", True, self.WHITE)
         self.records_button_rect = self.records_button_text.get_rect(center=(self.width // 2, 350))
 
         self.clock = pygame.time.Clock()
@@ -298,7 +337,7 @@ class Theme:
                 elif self.records_button_rect.collidepoint(event.pos):
                     pygame.quit()
                     tetris = TetrisGame()
-                    tetris.run(0)
+                    tetris.run(2)
                     self.running = False
                     sys.exit()
 
