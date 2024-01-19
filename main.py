@@ -17,6 +17,7 @@ class TetrisGame:
 
         self.BLACK = pygame.Color('black')
         self.WHITE = pygame.Color('white')
+        self.colors = [pygame.Color('red'), pygame.Color('blue'), pygame.Color('yellow'), pygame.Color('green')]
 
         self.block_size = 30
         self.grid_width = self.width // self.block_size
@@ -124,6 +125,8 @@ class TetrisGame:
                         self.current_tetromino = rotated_tetromino
 
     def update(self):
+        if self.current_y == 0 and self.fall_timer == 0:
+            self.set_color()
         self.fall_timer += 1
         if self.fall_timer >= self.fall_speed:
             if self.is_valid_move(0, 1):
@@ -186,13 +189,59 @@ class TetrisGame:
 
         pygame.display.flip()
 
-    def run(self):
+    def color_draw(self):
+        self.screen.fill(self.BLACK)
+        font = pygame.font.Font(None, 36)
+        score_text = font.render(f"Счёт: {self.score}", True, self.WHITE)
+        score_rect = score_text.get_rect(topleft=(10, 10))
+        self.screen.blit(score_text, score_rect)
+
+        for x in range(self.grid_width):
+            pygame.draw.line(self.screen, self.WHITE, (x * self.block_size, 0), (x * self.block_size, self.height))
+        for y in range(self.grid_height):
+            pygame.draw.line(self.screen, self.WHITE, (0, y * self.block_size), (self.width, y * self.block_size))
+
+        for y in range(self.grid_height):
+            for x in range(self.grid_width):
+                if self.grid[y][x]:
+                    pygame.draw.rect(
+                        self.screen,
+                        self.color_tetromino,
+                        (x * self.block_size, y * self.block_size, self.block_size, self.block_size)
+                    )
+
+        for y in range(len(self.current_tetromino)):
+            for x in range(len(self.current_tetromino[y])):
+                if self.current_tetromino[y][x]:
+                    pygame.draw.rect(
+                        self.screen,
+                        self.color_tetromino,
+                        (
+                            (self.current_x + x) * self.block_size,
+                            (self.current_y + y) * self.block_size,
+                            self.block_size,
+                            self.block_size
+                        )
+                    )
+
+        pygame.display.flip()
+
+    def run(self, mode):
         while self.running:
             self.clock.tick(30)
             self.handle_events()
             self.update()
-            self.draw()
+            if mode == 0:
+                self.draw()
+            if mode == 1:
+                self.color_draw()
         pygame.quit()
+
+    def set_color(self):
+        self.color_tetromino = random.choice(self.colors)
+        print(self.color_tetromino)
+
+
 
 class Theme:
     def __init__(self):
@@ -230,19 +279,19 @@ class Theme:
                 if self.play_button_rect.collidepoint(event.pos):
                     pygame.quit()
                     tetris = TetrisGame()
-                    tetris.run()
+                    tetris.run(0)
                     self.running = False
                     sys.exit()
                 elif self.quit_button_rect.collidepoint(event.pos):
                     pygame.quit()
                     tetris = TetrisGame()
-                    tetris.run()
+                    tetris.run(1)
                     self.running = False
                     sys.exit()
                 elif self.records_button_rect.collidepoint(event.pos):
                     pygame.quit()
                     tetris = TetrisGame()
-                    tetris.run()
+                    tetris.run(0)
                     self.running = False
                     sys.exit()
 
