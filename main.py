@@ -194,6 +194,77 @@ class TetrisGame:
             self.draw()
         pygame.quit()
 
+class Theme:
+    def __init__(self):
+        pygame.init()
+        self.width, self.height = 330, 600
+        self.screen = pygame.display.set_mode((self.width, self.height))
+        pygame.display.set_caption("Menu")
+
+        self.BLACK = (0, 0, 0)
+        self.WHITE = (255, 255, 255)
+
+        self.title_font = pygame.font.Font(None, 36)
+        self.button_font = pygame.font.Font(None, 28)
+
+        self.title_text = self.title_font.render("Выбор темы", True, self.WHITE)
+        self.title_rect = self.title_text.get_rect(center=(self.width // 2, 100))
+
+        self.play_button_text = self.button_font.render("Классика", True, self.WHITE)
+        self.play_button_rect = self.play_button_text.get_rect(center=(self.width // 2, 300))
+
+        self.quit_button_text = self.button_font.render("Цветной", True, self.WHITE)
+        self.quit_button_rect = self.quit_button_text.get_rect(center=(self.width // 2, 400))
+
+        self.records_button_text = self.button_font.render("Хз", True, self.WHITE)
+        self.records_button_rect = self.records_button_text.get_rect(center=(self.width // 2, 350))
+
+        self.clock = pygame.time.Clock()
+        self.running = True
+
+    def handle_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if self.play_button_rect.collidepoint(event.pos):
+                    pygame.quit()
+                    tetris = TetrisGame()
+                    tetris.run()
+                    self.running = False
+                    sys.exit()
+                elif self.quit_button_rect.collidepoint(event.pos):
+                    pygame.quit()
+                    tetris = TetrisGame()
+                    tetris.run()
+                    self.running = False
+                    sys.exit()
+                elif self.records_button_rect.collidepoint(event.pos):
+                    pygame.quit()
+                    tetris = TetrisGame()
+                    tetris.run()
+                    self.running = False
+                    sys.exit()
+
+    def draw(self):
+        self.screen.fill(self.BLACK)
+        self.screen.blit(self.title_text, self.title_rect)
+        pygame.draw.rect(self.screen, self.WHITE, self.play_button_rect, 2)
+        self.screen.blit(self.play_button_text, self.play_button_rect)
+        pygame.draw.rect(self.screen, self.WHITE, self.quit_button_rect, 2)
+        self.screen.blit(self.quit_button_text, self.quit_button_rect)
+
+        pygame.draw.rect(self.screen, self.WHITE, self.records_button_rect, 2)
+        self.screen.blit(self.records_button_text, self.records_button_rect)
+
+        pygame.display.flip()
+
+    def run(self):
+        while self.running:
+            self.clock.tick(30)
+            self.handle_events()
+            self.draw()
+
 
 class Menu:
     def __init__(self):
@@ -230,8 +301,8 @@ class Menu:
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if self.play_button_rect.collidepoint(event.pos):
                     pygame.quit()
-                    tetris_game = TetrisGame()
-                    tetris_game.run()
+                    theme_menu = Theme()
+                    theme_menu.run()
                     self.running = False
                     sys.exit()
                 elif self.quit_button_rect.collidepoint(event.pos):
@@ -262,6 +333,9 @@ class Menu:
             self.clock.tick(30)
             self.handle_events()
             self.draw()
+
+
+
 
 
 class GameOver:
