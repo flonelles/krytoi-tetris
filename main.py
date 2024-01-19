@@ -11,6 +11,8 @@ def show_menu():
 class TetrisGame:
     def __init__(self):
         pygame.init()
+        pygame.mixer.music.load("music/TETRIS.mp3")
+        pygame.mixer.music.play(-1)
         self.width, self.height = 330, 600
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption("Крутой тетрис")
@@ -289,6 +291,7 @@ class TetrisGame:
         self.color_tetromino = random.choice(self.colors)
 
 
+
 class Theme:
     def __init__(self):
         pygame.init()
@@ -362,6 +365,7 @@ class Theme:
 
 
 class Menu:
+
     def __init__(self):
         pygame.init()
         self.width, self.height = 330, 600
