@@ -20,7 +20,8 @@ class TetrisGame:
         self.BLACK = pygame.Color('black')
         self.WHITE = pygame.Color('white')
         self.BLUE = pygame.Color('blue')
-        self.colors = [pygame.Color('red'), pygame.Color('blue'), pygame.Color('yellow'), pygame.Color('green'), pygame.Color('pink'), pygame.Color('orange'), pygame.Color('grey')]
+        self.colors = [pygame.Color('red'), pygame.Color('blue'), pygame.Color('yellow'), pygame.Color('green'),
+                       pygame.Color('pink'), pygame.Color('orange'), pygame.Color('grey')]
 
         self.block_size = 30
         self.grid_width = self.width // self.block_size
@@ -47,18 +48,12 @@ class TetrisGame:
         self.running = True
         self.clock = pygame.time.Clock()
 
-    def set_fallen_color(self):
-        for y in range(len(self.current_tetromino)):
-            for x in range(len(self.current_tetromino[y])):
-                if self.current_tetromino[y][x]:
-                    self.grid[self.current_y + y][self.current_x + x] = self.color_tetromino
-
-    def update_grid_size(self):
+    def update_grid_size(self):  # Функция обновления размеров сетки в соответствии с размером экрана
         self.grid_width = self.width // self.block_size
         self.grid_height = self.height // self.block_size
         self.grid = [[0] * self.grid_width for _ in range(self.grid_height)]
 
-    def is_valid_move(self, move_x, move_y):
+    def is_valid_move(self, move_x, move_y):  # Функция проверки возможности движения фигуры без препятствий
         for y in range(len(self.current_tetromino)):
             for x in range(len(self.current_tetromino[y])):
                 if self.current_tetromino[y][x]:
@@ -108,11 +103,11 @@ class TetrisGame:
             self.grid.insert(0, [0] * self.grid_width)
             self.score += 10
 
-    def save_score(self):
+    def save_score(self):  # Функция сохранения счета в файл
         with open('tetris_records.txt', 'a') as file:
             file.write(f"{self.score}\n")
 
-    def handle_events(self):
+    def handle_events(self):  # обработка событий
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_LEFT]:
@@ -133,7 +128,7 @@ class TetrisGame:
                     if self.is_valid_move(0, 0):
                         self.current_tetromino = rotated_tetromino
 
-    def update(self):
+    def update(self):  # обновление состояния игры нового падующего блока
         if self.current_y == 0 and self.fall_timer == 0:
             self.set_color()
         self.fall_timer += 1
@@ -156,14 +151,14 @@ class TetrisGame:
 
             self.fall_timer = 0
 
-    def game_over(self):
+    def game_over(self):  # Завершение игры
         self.final_score = self.score
         self.save_score()  #
         self.running = False
         game_over_screen = GameOver(show_menu, self.final_score)
         game_over_screen.run()
 
-    def draw(self):
+    def draw(self):  # отрисовка элементов игры для 1 темы
         self.screen.fill(self.BLACK)
         font = pygame.font.Font(None, 36)
         score_text = font.render(f"Счёт: {self.score}", True, self.WHITE)
@@ -200,8 +195,8 @@ class TetrisGame:
 
         pygame.display.flip()
 
-    def color_draw(self):
-        self.screen.blit(pygame.image.load('image/photo_2024-01-19_20-12-18.jpg'), (0,0))
+    def color_draw(self):  # отрисовка элементов игры для 2 темы
+        self.screen.blit(pygame.image.load('image/photo_2024-01-19_20-12-18.jpg'), (0, 0))
         font = pygame.font.Font(None, 36)
         score_text = font.render(f"Счёт: {self.score}", True, self.WHITE)
         score_rect = score_text.get_rect(topleft=(10, 10))
@@ -237,8 +232,8 @@ class TetrisGame:
 
         pygame.display.flip()
 
-    def alt_color_draw(self):
-        self.screen.blit(pygame.image.load('image/6068467286.jpg'), (0,0))
+    def alt_color_draw(self):  # отрисовка элементов игры для 3 темы
+        self.screen.blit(pygame.image.load('image/6068467286.jpg'), (0, 0))
         font = pygame.font.Font(None, 36)
         score_text = font.render(f"Счёт: {self.score}", True, self.WHITE)
         score_rect = score_text.get_rect(topleft=(10, 10))
@@ -274,7 +269,7 @@ class TetrisGame:
 
         pygame.display.flip()
 
-    def run(self, mode):
+    def run(self, mode):  # запуск
         while self.running:
             self.clock.tick(30)
             self.handle_events()
@@ -287,9 +282,8 @@ class TetrisGame:
                 self.alt_color_draw()
         pygame.quit()
 
-    def set_color(self):
+    def set_color(self):  # новый цвет для нового блока
         self.color_tetromino = random.choice(self.colors)
-
 
 
 class Theme:
@@ -526,7 +520,7 @@ class TableRecords:
         self.menu = Menu()
         self.menu.run()
 
-    def get_top_records(self, limit=10):
+    def get_top_records(self, limit=10):  # топ 10 рекордо в игре метод получения
         try:
             with open(self.records_file_path, 'r') as file:
                 records = [int(line.strip()) for line in file.readlines()]
